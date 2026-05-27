@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FinTech LLM Fine-Tuning Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Workflow navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <i data-lucide="brain-circuit"></i>
+        </div>
+        <div>
+          <p>FinTech LLM</p>
+          <span>Fine-Tuning Studio</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item is-active" data-view="overview">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-view="dataset">
+          <i data-lucide="database"></i>
+          <span>Dataset</span>
+        </button>
+        <button class="nav-item" data-view="train">
+          <i data-lucide="sliders-horizontal"></i>
+          <span>Train</span>
+        </button>
+        <button class="nav-item" data-view="inference">
+          <i data-lucide="message-square-text"></i>
+          <span>Inference</span>
+        </button>
+        <button class="nav-item" data-view="evaluate">
+          <i data-lucide="badge-check"></i>
+          <span>Evaluate</span>
+        </button>
+      </nav>
+
+      <div class="run-card">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Local project</strong>
+          <p>Static UI connected to project commands.</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Domain adaptation workflow</p>
+          <h1>Finance and technology LLM fine-tuning</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="copy-active-command" title="Copy command">
+            <i data-lucide="copy"></i>
+          </button>
+          <a class="primary-link" href="../README.md" title="Open project README">
+            <i data-lucide="book-open"></i>
+            <span>README</span>
+          </a>
+        </div>
+      </header>
+
+      <section class="view is-visible" id="overview">
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <i data-lucide="landmark"></i>
+            <span>Finance examples</span>
+            <strong>18</strong>
+          </article>
+          <article class="metric-card">
+            <i data-lucide="server-cog"></i>
+            <span>Tech examples</span>
+            <strong>18</strong>
+          </article>
+          <article class="metric-card">
+            <i data-lucide="file-check-2"></i>
+            <span>Validation set</span>
+            <strong>8</strong>
+          </article>
+          <article class="metric-card">
+            <i data-lucide="layers-3"></i>
+            <span>Training method</span>
+            <strong>LoRA</strong>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel wide">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Workflow</p>
+                <h2>Execution pipeline</h2>
+              </div>
+            </div>
+            <div class="pipeline" aria-label="Fine-tuning workflow">
+              <div class="pipeline-step">
+                <i data-lucide="file-json"></i>
+                <span>JSONL data</span>
+              </div>
+              <div class="connector"></div>
+              <div class="pipeline-step">
+                <i data-lucide="scan-search"></i>
+                <span>Validate</span>
+              </div>
+              <div class="connector"></div>
+              <div class="pipeline-step">
+                <i data-lucide="cpu"></i>
+                <span>LoRA train</span>
+              </div>
+              <div class="connector"></div>
+              <div class="pipeline-step">
+                <i data-lucide="send"></i>
+                <span>Infer</span>
+              </div>
+              <div class="connector"></div>
+              <div class="pipeline-step">
+                <i data-lucide="chart-no-axes-column"></i>
+                <span>Evaluate</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Run first</p>
+                <h2>Dataset check</h2>
+              </div>
+              <i data-lucide="terminal"></i>
+            </div>
+            <pre class="command-block active-command"><code>python scripts/prepare_dataset.py --train data/train.jsonl --validation data/validation.jsonl</code></pre>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="dataset">
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Browse</p>
+                <h2>Training examples</h2>
+              </div>
+              <i data-lucide="filter"></i>
+            </div>
+            <div class="field-row">
+              <label>
+                Domain
+                <select id="domain-filter">
+                  <option value="all">All domains</option>
+                  <option value="finance">Finance</option>
+                  <option value="tech">Technology</option>
+                </select>
+              </label>
+              <label>
+                Task type
+                <select id="task-filter">
+                  <option value="all">All tasks</option>
+                  <option value="explain">Explain</option>
+                  <option value="summarize">Summarize</option>
+                  <option value="answer">Answer</option>
+                </select>
+              </label>
+            </div>
+            <div class="example-list" id="example-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Schema</p>
+                <h2>JSONL format</h2>
+              </div>
+              <i data-lucide="braces"></i>
+            </div>
+            <pre class="code-block"><code>{
+  "domain": "finance",
+  "instruction": "Explain EBITDA.",
+  "input": "",
+  "output": "EBITDA means..."
+}</code></pre>
+            <pre class="command-block active-command"><code>python scripts/prepare_dataset.py --train data/train.jsonl --validation data/validation.jsonl</code></pre>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="train">
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Configure</p>
+                <h2>LoRA training</h2>
+              </div>
+              <i data-lucide="settings-2"></i>
+            </div>
+            <div class="form-grid">
+              <label>
+                Base model
+                <select id="model-name">
+                  <option value="mistralai/Mistral-7B-Instruct-v0.3">Mistral 7B Instruct</option>
+                  <option value="meta-llama/Meta-Llama-3-8B-Instruct">Llama 3 8B Instruct</option>
+                  <option value="TinyLlama/TinyLlama-1.1B-Chat-v1.0">TinyLlama smoke test</option>
+                </select>
+              </label>
+              <label>
+                Output directory
+                <input id="output-dir" value="outputs/fintech-lora" />
+              </label>
+              <label>
+                Epochs
+                <input id="epochs" type="number" min="1" max="10" value="3" />
+              </label>
+              <label>
+                Learning rate
+                <input id="learning-rate" value="2e-4" />
+              </label>
+              <label>
+                Batch size
+                <input id="batch-size" type="number" min="1" max="8" value="1" />
+              </label>
+              <label>
+                Gradient accumulation
+                <input id="grad-accum" type="number" min="1" max="32" value="8" />
+              </label>
+              <label>
+                Max length
+                <input id="max-length" type="number" min="128" max="4096" value="1024" />
+              </label>
+              <label class="check-row">
+                <input id="use-4bit" type="checkbox" checked />
+                <span>Use 4-bit loading on CUDA</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel command-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">PowerShell</p>
+                <h2>Training command</h2>
+              </div>
+              <button class="icon-button copy-command" data-copy-target="training-command" title="Copy training command">
+                <i data-lucide="copy"></i>
+              </button>
+            </div>
+            <pre class="command-block active-command"><code id="training-command"></code></pre>
+            <div class="note">
+              <i data-lucide="info"></i>
+              <span>For CPU or Windows without bitsandbytes, turn off 4-bit loading.</span>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="inference">
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Prompt</p>
+                <h2>Test the adapter</h2>
+              </div>
+              <i data-lucide="message-circle-question"></i>
+            </div>
+            <div class="form-grid single">
+              <label>
+                Adapter path
+                <input id="adapter-path" value="outputs/fintech-lora" />
+              </label>
+              <label>
+                Instruction
+                <textarea id="instruction-input" rows="4">Explain how equity dilution affects existing shareholders.</textarea>
+              </label>
+              <label>
+                Context
+                <textarea id="context-input" rows="4" placeholder="Optional document text"></textarea>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel command-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">PowerShell</p>
+                <h2>Inference command</h2>
+              </div>
+              <button class="icon-button copy-command" data-copy-target="inference-command" title="Copy inference command">
+                <i data-lucide="copy"></i>
+              </button>
+            </div>
+            <pre class="command-block active-command"><code id="inference-command"></code></pre>
+            <div class="response-preview">
+              <span>Expected answer shape</span>
+              <p>Professional explanation using ownership percentage, new shares, shareholder impact, and valuation context.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="evaluate">
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Quality</p>
+                <h2>Evaluation checklist</h2>
+              </div>
+              <i data-lucide="clipboard-check"></i>
+            </div>
+            <ul class="checklist">
+              <li><i data-lucide="check"></i><span>Uses correct domain terminology</span></li>
+              <li><i data-lucide="check"></i><span>Answers finance and technology questions directly</span></li>
+              <li><i data-lucide="check"></i><span>Explains limitations and risks where relevant</span></li>
+              <li><i data-lucide="check"></i><span>Summarizes documents with concise business context</span></li>
+              <li><i data-lucide="check"></i><span>Maintains professional tone</span></li>
+            </ul>
+          </section>
+
+          <section class="panel command-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">PowerShell</p>
+                <h2>Keyword evaluation</h2>
+              </div>
+              <button class="icon-button copy-command" data-copy-target="evaluation-command" title="Copy evaluation command">
+                <i data-lucide="copy"></i>
+              </button>
+            </div>
+            <pre class="command-block active-command"><code id="evaluation-command"></code></pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">Copied command</div>
+  </body>
+</html>
